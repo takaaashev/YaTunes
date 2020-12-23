@@ -1,3 +1,3 @@
 export const musicPlayerInit = () => {
-    console.groupCollapsed('music Init');
+    console.log('music Init');
 };
