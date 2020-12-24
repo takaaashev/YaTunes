@@ -1,3 +1,5 @@
+import { addZero } from './supScript.js';
+
 export const videoPlayerInit = () => {
   // video-player
   // video-button__play
@@ -37,7 +39,6 @@ export const videoPlayerInit = () => {
 
   }
 
-  const addZero = n => n < 10 ? '0' + n : n;
 
   videoPlayer.addEventListener('click', togglePlay);
   videoButtonPlay.addEventListener('click', togglePlay);

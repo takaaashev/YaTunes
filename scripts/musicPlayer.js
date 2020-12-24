@@ -1,59 +1,111 @@
+import { addZero } from './supScript.js';
+
 export const musicPlayerInit = () => {
-    const radio = document.querySelector('.radio');
-    const radioCoverImg = document.querySelector('.radio-cover__img');
-    const radioNavigation = document.querySelector('.radio-navigation');
-    const radioHeaderBig = document.querySelector('.radio-header__big');
-    const radioItem = document.querySelectorAll('.radio-item');
-    const radioStop = document.querySelector('.radio-stop');
+    const audio = document.querySelector('.audio');
+    const audioImg = document.querySelector('.audio-img');
+    const audioHeader = document.querySelector('.audio-header');
+    const audioPlayer = document.querySelector('.audio-player');
+    const audioNavigation = document.querySelector('.audio-navigation');
+    const audioButtonPlay = document.querySelector('.audio-button__play');
+    const audioProgress = document.querySelector('.audio-progress');
+    const audioProgressTiming = document.querySelector('.audio-progress__timing');
+    const audioTimePassed = document.querySelector('.audio-time__passed');
+    const audioTimeTotal = document.querySelector('.audio-time__total');
 
-    const audio = new Audio();
-    audio.type = 'audio/aac';
+    const playlist = ['hello', 'flow', 'speed'];
 
-    radioStop.diasbled = true;
+    let trackIndex = 0;
 
-    const changeIconPlay = () => {
-        if (audio.paused) {
-            radio.classList.remove('play');
-            radioStop.classList.add('fa-play');
-            radioStop.classList.remove('fa-stop');
+    const loadTrack = () => {
+        const isPlayed = audioPlayer.paused;
+        const track = playlist[trackIndex];
+
+        audioImg.src = `./audio/${track}.jpg`;
+        audioHeader.textContent = track.toUpperCase();
+        audioPlayer.src = `./audio/${track}.mp3`;
+
+        if (isPlayed) {
+            audioPlayer.pause();
         } else {
-            radio.classList.add('play');
-            radioStop.classList.add('fa-stop');
-            radioStop.classList.remove('fa-play');
+            audioPlayer.play();
         }
     }
 
-    const selectItem = elem => {
-        radioItem.forEach(item => item.classList.remove('select'));
-        elem.classList.add('select');
+    const prevTrack = () => {
+        if (trackIndex !==0) {
+            trackIndex--;
+        } else {
+            trackIndex = playlist.length - 1;
+        } 
+        loadTrack();
     }
 
-    radioNavigation.addEventListener('change', event => {
+    const nextTrack = () => {
+        if (trackIndex ===  playlist.length - 1) {
+            trackIndex = 0;
+        } else {
+            trackIndex++;
+        } 
+        loadTrack();
+    }
+
+
+    audioNavigation.addEventListener('click', event => {
         const target = event.target;
-        const parrent = target.closest('.radio-item');
-        selectItem(parrent);
 
-        const title = parrent.querySelector('.radio-name').textContent;
-        radioHeaderBig.textContent = title;
+        if (target.classList.contains('audio-button__play')) {
+            audio.classList.toggle('play');
+            audioButtonPlay.classList.toggle('fa-play');
+            audioButtonPlay.classList.toggle('fa-pause');
 
-        const UrlImg = parrent.querySelector('.radio-img').src;
-        radioCoverImg.src = UrlImg;
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+            } else {
+                audioPlayer.pause();
+            }
 
+            const track = playlist[trackIndex];
+            audioHeader.textContent = track.toUpperCase();
+        }
 
-        radioStop.diasbled = false;
-        audio.src = target.dataset.radioStantion;
+        if (target.classList.contains('audio-button__prev')) {
+            prevTrack();
+        }
 
-        audio.play();
-        changeIconPlay();
+        if (target.classList.contains('audio-button__next')) {
+            nextTrack();
+        }
 
     });
 
-    radioStop.addEventListener('click', () => {
-        if (audio.paused) {
-            audio.play();
-        } else {
-            audio.pause();
-        }
-        changeIconPlay();
-    })
+    audioPlayer.addEventListener('ended', () => {
+        nextTrack();
+        audioPlayer.play();
+    });
+
+    audioPlayer.addEventListener('timeupdate', () => {
+        const duration = audioPlayer.duration;
+        const currentTime = audioPlayer.currentTime;
+        const progress = (currentTime / duration ) * 100;
+
+        audioProgressTiming.style.width = progress +'%';
+
+        const minutesPassed = Math.floor(currentTime / 60) || '0';
+        const secondsPassed = Math.floor(currentTime % 60) || '0';
+
+        const minutesTotal = Math.floor(duration / 60) || '0';
+        const secondsTotal = Math.floor(duration % 60) || '0';
+
+        audioTimePassed.textContent = `${addZero(minutesPassed)}:${addZero(secondsPassed)}`;
+        audioTimeTotal.textContent = `${addZero(minutesTotal)}:${addZero(secondsTotal)}`;
+
+
+    });
+
+        audioProgress.addEventListener('click', event => {
+            const x = event.offsetX;
+            const allWidth = audioProgress.clientWidth;
+            const progress = (x / allWidth) * audioPlayer.duration;
+            audioPlayer.currentTime = progress;
+        })
 };
